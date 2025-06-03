@@ -1,10 +1,9 @@
-
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { LogOut, Bell, Activity } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import Navigation from './Navigation';
-import { useState } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
