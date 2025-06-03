@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { LogOut, Bell, Activity } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import Navigation from './Navigation';
+import { useState } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,7 +13,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   const { user, logout } = useAuth();
-  const { alerts } = useData();
+  const { getUnresolvedAlerts } = useData();
+  const [currentView, setCurrentView] = useState<'dashboard' | 'alerts' | 'contacts'>('dashboard');
 
   const handleLogout = () => {
     logout();
@@ -21,8 +24,8 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     });
   };
 
-  const recentAlerts = alerts.slice(0, 5);
-  const criticalAlerts = alerts.filter(alert => alert.type === 'critical').length;
+  const unresolvedAlerts = getUnresolvedAlerts();
+  const criticalAlerts = unresolvedAlerts.filter(alert => alert.type === 'critical').length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -59,31 +62,16 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             </div>
           </div>
         </div>
+        
+        <Navigation
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          alertCount={unresolvedAlerts.length}
+        />
       </header>
 
       <main className="p-6">
-        {recentAlerts.length > 0 && (
-          <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-            <div className="flex items-start">
-              <Bell className="h-5 w-5 text-yellow-400 mt-0.5 mr-3" />
-              <div>
-                <h3 className="text-sm font-medium text-yellow-800">Recent Alerts</h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  {recentAlerts.slice(0, 2).map(alert => (
-                    <div key={alert.id} className="mb-1">
-                      <span className="font-medium">{alert.message}</span> - {alert.timestamp.toLocaleTimeString()}
-                    </div>
-                  ))}
-                  {recentAlerts.length > 2 && (
-                    <p className="text-xs">...and {recentAlerts.length - 2} more alerts</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {children}
+        {React.cloneElement(children as React.ReactElement, { currentView })}
       </main>
     </div>
   );

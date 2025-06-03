@@ -18,6 +18,10 @@ export interface Alert {
   timestamp: Date;
   vital: string;
   value: number;
+  resolved: boolean;
+  actionTaken?: string;
+  resolvedBy?: string;
+  resolvedAt?: Date;
 }
 
 export interface Patient {
@@ -28,16 +32,68 @@ export interface Patient {
   assignedCaretakers: string[];
   vitals: Vitals;
   remarks: string;
+  doctorId: string;
+  emergencyContact: string;
+  vitalHistory: Vitals[];
+}
+
+export interface Doctor {
+  id: string;
+  name: string;
+  phone: string;
+  specialization: string;
+}
+
+export interface Caretaker {
+  id: string;
+  name: string;
+  phone: string;
 }
 
 interface DataContextType {
   patients: Patient[];
   alerts: Alert[];
+  doctors: Doctor[];
+  caretakers: Caretaker[];
   addRemark: (patientId: string, remark: string) => void;
   getPatientsByCaretaker: (caretakerId: string) => Patient[];
+  resolveAlert: (alertId: string, actionTaken: string, resolvedBy: string) => void;
+  getUnresolvedAlerts: () => Alert[];
+  getResolvedAlerts: () => Alert[];
+  getPatientById: (patientId: string) => Patient | undefined;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
+
+const initialDoctors: Doctor[] = [
+  { id: '1', name: 'Dr. Sarah Wilson', phone: '+1-555-0101', specialization: 'Cardiology' },
+  { id: '2', name: 'Dr. Michael Chen', phone: '+1-555-0102', specialization: 'Internal Medicine' },
+  { id: '3', name: 'Dr. Emily Rodriguez', phone: '+1-555-0103', specialization: 'Pulmonology' },
+];
+
+const initialCaretakers: Caretaker[] = [
+  { id: '3', name: 'Alice Johnson', phone: '+1-555-0201' },
+  { id: '4', name: 'Bob Wilson', phone: '+1-555-0202' },
+];
+
+const generateVitalHistory = (): Vitals[] => {
+  const history: Vitals[] = [];
+  const now = new Date();
+  
+  for (let i = 23; i >= 0; i--) {
+    const timestamp = new Date(now.getTime() - (i * 60 * 60 * 1000)); // Every hour for last 24 hours
+    history.push({
+      heartRate: 70 + Math.random() * 30,
+      bloodPressureSystolic: 110 + Math.random() * 30,
+      bloodPressureDiastolic: 70 + Math.random() * 20,
+      spO2: 95 + Math.random() * 5,
+      temperature: 36.2 + Math.random() * 1.5,
+      timestamp
+    });
+  }
+  
+  return history;
+};
 
 const initialPatients: Patient[] = [
   {
@@ -46,6 +102,8 @@ const initialPatients: Patient[] = [
     age: 65,
     condition: 'Hypertension',
     assignedCaretakers: ['3'],
+    doctorId: '1',
+    emergencyContact: '+1-555-0301',
     vitals: {
       heartRate: 75,
       bloodPressureSystolic: 120,
@@ -54,7 +112,8 @@ const initialPatients: Patient[] = [
       temperature: 36.5,
       timestamp: new Date()
     },
-    remarks: ''
+    remarks: '',
+    vitalHistory: generateVitalHistory()
   },
   {
     id: '2',
@@ -62,6 +121,8 @@ const initialPatients: Patient[] = [
     age: 72,
     condition: 'Diabetes',
     assignedCaretakers: ['3', '4'],
+    doctorId: '2',
+    emergencyContact: '+1-555-0302',
     vitals: {
       heartRate: 68,
       bloodPressureSystolic: 110,
@@ -70,7 +131,8 @@ const initialPatients: Patient[] = [
       temperature: 37.1,
       timestamp: new Date()
     },
-    remarks: ''
+    remarks: '',
+    vitalHistory: generateVitalHistory()
   },
   {
     id: '3',
@@ -78,6 +140,8 @@ const initialPatients: Patient[] = [
     age: 58,
     condition: 'Heart Disease',
     assignedCaretakers: ['4'],
+    doctorId: '1',
+    emergencyContact: '+1-555-0303',
     vitals: {
       heartRate: 85,
       bloodPressureSystolic: 140,
@@ -86,7 +150,8 @@ const initialPatients: Patient[] = [
       temperature: 36.8,
       timestamp: new Date()
     },
-    remarks: ''
+    remarks: '',
+    vitalHistory: generateVitalHistory()
   },
   {
     id: '4',
@@ -94,6 +159,8 @@ const initialPatients: Patient[] = [
     age: 69,
     condition: 'COPD',
     assignedCaretakers: ['3'],
+    doctorId: '3',
+    emergencyContact: '+1-555-0304',
     vitals: {
       heartRate: 78,
       bloodPressureSystolic: 125,
@@ -102,7 +169,8 @@ const initialPatients: Patient[] = [
       temperature: 36.9,
       timestamp: new Date()
     },
-    remarks: ''
+    remarks: '',
+    vitalHistory: generateVitalHistory()
   }
 ];
 
@@ -119,7 +187,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const generateRandomVitals = (baseVitals: Vitals): Vitals => {
-    const variance = 0.1; // 10% variance
+    const variance = 0.1;
     
     return {
       heartRate: Math.max(50, Math.min(150, baseVitals.heartRate + (Math.random() - 0.5) * baseVitals.heartRate * variance)),
@@ -150,13 +218,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           message,
           timestamp: new Date(),
           vital,
-          value
+          value,
+          resolved: false
         });
       }
     });
 
     if (newAlerts.length > 0) {
-      setAlerts(prev => [...newAlerts, ...prev].slice(0, 100)); // Keep only last 100 alerts
+      setAlerts(prev => [...newAlerts, ...prev].slice(0, 200));
     }
   };
 
@@ -169,11 +238,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           return {
             ...patient,
-            vitals: newVitals
+            vitals: newVitals,
+            vitalHistory: [...patient.vitalHistory.slice(-23), newVitals]
           };
         })
       );
-    }, 5000); // Update every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -194,12 +264,46 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
+  const resolveAlert = (alertId: string, actionTaken: string, resolvedBy: string) => {
+    setAlerts(prev => 
+      prev.map(alert => 
+        alert.id === alertId 
+          ? { 
+              ...alert, 
+              resolved: true, 
+              actionTaken, 
+              resolvedBy, 
+              resolvedAt: new Date() 
+            }
+          : alert
+      )
+    );
+  };
+
+  const getUnresolvedAlerts = (): Alert[] => {
+    return alerts.filter(alert => !alert.resolved);
+  };
+
+  const getResolvedAlerts = (): Alert[] => {
+    return alerts.filter(alert => alert.resolved);
+  };
+
+  const getPatientById = (patientId: string): Patient | undefined => {
+    return patients.find(patient => patient.id === patientId);
+  };
+
   return (
     <DataContext.Provider value={{ 
       patients, 
       alerts, 
+      doctors: initialDoctors,
+      caretakers: initialCaretakers,
       addRemark, 
-      getPatientsByCaretaker 
+      getPatientsByCaretaker,
+      resolveAlert,
+      getUnresolvedAlerts,
+      getResolvedAlerts,
+      getPatientById
     }}>
       {children}
     </DataContext.Provider>
