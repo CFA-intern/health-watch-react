@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface Vitals {
@@ -174,6 +173,52 @@ const initialPatients: Patient[] = [
   }
 ];
 
+// Create some sample resolved alerts for demonstration
+const createSampleResolvedAlerts = (): Alert[] => {
+  const now = new Date();
+  return [
+    {
+      id: 'resolved-1',
+      patientId: '1',
+      type: 'critical',
+      message: 'Blood pressure critically high: 180/110',
+      timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000), // 2 hours ago
+      vital: 'bloodPressureSystolic',
+      value: 180,
+      resolved: true,
+      actionTaken: 'Administered antihypertensive medication. Patient monitored closely for 30 minutes. Blood pressure stabilized to 140/85.',
+      resolvedBy: 'Dr. Sarah Wilson',
+      resolvedAt: new Date(now.getTime() - 1.5 * 60 * 60 * 1000)
+    },
+    {
+      id: 'resolved-2',
+      patientId: '2',
+      type: 'warning',
+      message: 'Heart rate elevated: 105 bpm',
+      timestamp: new Date(now.getTime() - 4 * 60 * 60 * 1000), // 4 hours ago
+      vital: 'heartRate',
+      value: 105,
+      resolved: true,
+      actionTaken: 'Patient was encouraged to rest and provided with relaxation techniques. Heart rate returned to normal range after 20 minutes.',
+      resolvedBy: 'Alice Johnson',
+      resolvedAt: new Date(now.getTime() - 3.5 * 60 * 60 * 1000)
+    },
+    {
+      id: 'resolved-3',
+      patientId: '4',
+      type: 'critical',
+      message: 'Oxygen saturation too low: 88%',
+      timestamp: new Date(now.getTime() - 6 * 60 * 60 * 1000), // 6 hours ago
+      vital: 'spO2',
+      value: 88,
+      resolved: true,
+      actionTaken: 'Oxygen therapy initiated immediately. Nebulizer treatment administered. Patient responded well, SpO2 improved to 95%.',
+      resolvedBy: 'Dr. Emily Rodriguez',
+      resolvedAt: new Date(now.getTime() - 5.5 * 60 * 60 * 1000)
+    }
+  ];
+};
+
 const thresholds = {
   heartRate: { min: 60, max: 100 },
   bloodPressureSystolic: { min: 90, max: 140 },
@@ -184,7 +229,7 @@ const thresholds = {
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [patients, setPatients] = useState<Patient[]>(initialPatients);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>(createSampleResolvedAlerts());
 
   const generateRandomVitals = (baseVitals: Vitals): Vitals => {
     const variance = 0.1;

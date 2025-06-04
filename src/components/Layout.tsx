@@ -5,6 +5,8 @@ import { useData } from '../contexts/DataContext';
 import { LogOut, Bell, Activity } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import Navigation from './Navigation';
+import AlertHistoryView from './AlertHistoryView';
+import ContactsView from './ContactsView';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -26,6 +28,18 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
 
   const unresolvedAlerts = getUnresolvedAlerts();
   const criticalAlerts = unresolvedAlerts.filter(alert => alert.type === 'critical').length;
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'alerts':
+        return <AlertHistoryView />;
+      case 'contacts':
+        return <ContactsView showAll={user?.role === 'admin'} />;
+      case 'dashboard':
+      default:
+        return children;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,10 +85,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       </header>
 
       <main className="p-6">
-        {React.isValidElement(children) ? 
-          React.cloneElement(children as React.ReactElement, { currentView }) : 
-          children
-        }
+        {renderContent()}
       </main>
     </div>
   );
