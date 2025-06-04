@@ -37,7 +37,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentView = 'dashboar
       case 'alerts':
         return <AlertHistoryView />;
       case 'contacts':
-        return <ContactsView />;
+        return <ContactsView showAll={true} />;
       default:
         return (
           <div className="space-y-6">
@@ -84,7 +84,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentView = 'dashboar
               </div>
             </div>
 
-            {/* Recent Alerts */}
+            {/* Recent Alerts - without resolve option for admin */}
             <RecentAlerts />
 
             {/* Search */}

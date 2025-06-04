@@ -1,6 +1,5 @@
 
-import { useState } from 'react';
-import { Activity, AlertTriangle, Phone, History, Users } from 'lucide-react';
+import { AlertTriangle, Phone, Activity } from 'lucide-react';
 
 interface NavigationProps {
   currentView: 'dashboard' | 'alerts' | 'contacts';

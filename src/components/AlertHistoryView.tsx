@@ -2,9 +2,17 @@
 import { useData } from '../contexts/DataContext';
 import { AlertTriangle, Clock, User, CheckCircle, FileText } from 'lucide-react';
 
-const AlertHistoryView = () => {
+interface AlertHistoryViewProps {
+  patientIds?: string[]; // Optional array of patient IDs to filter alerts
+}
+
+const AlertHistoryView: React.FC<AlertHistoryViewProps> = ({ patientIds }) => {
   const { getResolvedAlerts, getPatientById } = useData();
-  const resolvedAlerts = getResolvedAlerts();
+  
+  // Filter alerts if patientIds are provided
+  const resolvedAlerts = patientIds 
+    ? getResolvedAlerts().filter(alert => patientIds.includes(alert.patientId))
+    : getResolvedAlerts();
 
   if (resolvedAlerts.length === 0) {
     return (

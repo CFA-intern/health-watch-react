@@ -1,59 +1,62 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type UserRole = 'admin' | 'doctor' | 'caretaker';
-
-export interface User {
+interface User {
   id: string;
-  username: string;
-  role: UserRole;
   name: string;
+  role: 'admin' | 'doctor' | 'caretaker'; // Added role field
+  email: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => boolean;
+  login: (email: string, password: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const hardcodedUsers: User[] = [
-  { id: '1', username: 'admin', role: 'admin', name: 'Dr. Sarah Admin' },
-  { id: '2', username: 'doctor', role: 'doctor', name: 'Dr. John Smith' },
-  { id: '3', username: 'caretaker1', role: 'caretaker', name: 'Nurse Alice Johnson' },
-  { id: '4', username: 'caretaker2', role: 'caretaker', name: 'Nurse Bob Wilson' },
-];
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Mock user for development
+  const [user, setUser] = useState<User | null>({
+    id: '3', // Using caretaker ID as default
+    name: 'Alice Johnson',
+    role: 'caretaker',
+    email: 'alice@example.com'
+  });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+  const login = (email: string, password: string) => {
+    // This is just a mock login function
+    if (email === 'admin@example.com') {
+      setUser({
+        id: '1',
+        name: 'Admin User',
+        role: 'admin',
+        email: 'admin@example.com'
+      });
+    } else if (email === 'doctor@example.com') {
+      setUser({
+        id: '2',
+        name: 'Dr. Sarah Wilson',
+        role: 'doctor',
+        email: 'doctor@example.com'
+      });
+    } else {
+      setUser({
+        id: '3',
+        name: 'Alice Johnson',
+        role: 'caretaker',
+        email: 'alice@example.com'
+      });
     }
-  }, []);
-
-  const login = (username: string, password: string): boolean => {
-    // For demo purposes, password is same as username
-    const foundUser = hardcodedUsers.find(u => u.username === username && password === username);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('currentUser', JSON.stringify(foundUser));
-      return true;
-    }
-    return false;
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('currentUser');
   };
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = user !== null;
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>

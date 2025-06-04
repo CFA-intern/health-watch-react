@@ -46,7 +46,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ currentView = 'dashbo
       case 'alerts':
         return <AlertHistoryView />;
       case 'contacts':
-        return <ContactsView />;
+        return <ContactsView showAll={true} />;
       default:
         return (
           <div className="space-y-6">
@@ -93,7 +93,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ currentView = 'dashbo
               </div>
             </div>
 
-            {/* Recent Alerts */}
+            {/* Recent Alerts - without resolve option for doctors */}
             <RecentAlerts />
 
             {/* Search */}

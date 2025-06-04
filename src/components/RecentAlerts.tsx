@@ -2,13 +2,18 @@
 import { useData } from '../contexts/DataContext';
 import { AlertTriangle, Clock, User, Activity, Heart, Thermometer, Droplets } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-const RecentAlerts = () => {
+const RecentAlerts = ({ patientIds = [] }) => {
   const { getUnresolvedAlerts, getPatientById, resolveAlert } = useData();
+  const { user } = useAuth();
   const [resolvingAlert, setResolvingAlert] = useState<string | null>(null);
   const [actionTaken, setActionTaken] = useState('');
   
-  const unresolvedAlerts = getUnresolvedAlerts().slice(0, 5);
+  // Filter alerts based on patient IDs if provided (for caretakers)
+  const unresolvedAlerts = patientIds.length > 0 
+    ? getUnresolvedAlerts().filter(alert => patientIds.includes(alert.patientId)).slice(0, 5)
+    : getUnresolvedAlerts().slice(0, 5);
 
   const getVitalIcon = (vital: string) => {
     switch (vital) {
@@ -23,7 +28,7 @@ const RecentAlerts = () => {
 
   const handleResolveAlert = (alertId: string) => {
     if (actionTaken.trim()) {
-      resolveAlert(alertId, actionTaken, 'Current User');
+      resolveAlert(alertId, actionTaken, user?.name || 'Unknown User');
       setResolvingAlert(null);
       setActionTaken('');
     }
@@ -42,6 +47,9 @@ const RecentAlerts = () => {
       </div>
     );
   }
+
+  // Display the user interface logic - only show resolve button for caretakers
+  const showResolveButton = user?.role === 'caretaker';
 
   return (
     <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
@@ -83,40 +91,44 @@ const RecentAlerts = () => {
                         )}
                       </div>
                       
-                      {resolvingAlert === alert.id ? (
-                        <div className="mt-3 space-y-2">
-                          <textarea
-                            value={actionTaken}
-                            onChange={(e) => setActionTaken(e.target.value)}
-                            placeholder="Describe the action taken to resolve this alert..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                            rows={2}
-                          />
-                          <div className="flex gap-2">
+                      {showResolveButton && (
+                        <>
+                          {resolvingAlert === alert.id ? (
+                            <div className="mt-3 space-y-2">
+                              <textarea
+                                value={actionTaken}
+                                onChange={(e) => setActionTaken(e.target.value)}
+                                placeholder="Describe the action taken to resolve this alert..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                rows={2}
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleResolveAlert(alert.id)}
+                                  className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded"
+                                >
+                                  Resolve
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setResolvingAlert(null);
+                                    setActionTaken('');
+                                  }}
+                                  className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs rounded"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
                             <button
-                              onClick={() => handleResolveAlert(alert.id)}
-                              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded"
+                              onClick={() => setResolvingAlert(alert.id)}
+                              className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
                             >
-                              Resolve
+                              Resolve Alert
                             </button>
-                            <button
-                              onClick={() => {
-                                setResolvingAlert(null);
-                                setActionTaken('');
-                              }}
-                              className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setResolvingAlert(alert.id)}
-                          className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
-                        >
-                          Resolve Alert
-                        </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>

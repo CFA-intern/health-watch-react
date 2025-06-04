@@ -37,9 +37,9 @@ const CaretakerDashboard: React.FC<CaretakerDashboardProps> = ({ currentView = '
   const renderContent = () => {
     switch (currentView) {
       case 'alerts':
-        return <AlertHistoryView />;
+        return <AlertHistoryView patientIds={patientIds} />;
       case 'contacts':
-        return <ContactsView />;
+        return <ContactsView showAll={false} />;
       default:
         return (
           <div className="space-y-6">
@@ -87,7 +87,7 @@ const CaretakerDashboard: React.FC<CaretakerDashboardProps> = ({ currentView = '
             </div>
 
             {/* Recent Alerts */}
-            <RecentAlerts />
+            <RecentAlerts patientIds={patientIds} />
 
             {/* Search */}
             <div className="bg-white p-4 rounded-lg shadow-md">
