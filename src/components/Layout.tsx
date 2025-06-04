@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -70,7 +71,10 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       </header>
 
       <main className="p-6">
-        {React.cloneElement(children as React.ReactElement, { currentView })}
+        {React.isValidElement(children) ? 
+          React.cloneElement(children as React.ReactElement, { currentView }) : 
+          children
+        }
       </main>
     </div>
   );
