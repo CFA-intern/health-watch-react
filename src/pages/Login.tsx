@@ -10,7 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,27 +18,30 @@ const Login = () => {
     setIsLoading(true);
 
     setTimeout(() => {
-      const success = login(username, password);
+      login(username, password);
       
-      if (success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to the Patient Monitoring System",
-        });
+      // Check if login was successful by checking if user exists after login
+      setTimeout(() => {
+        if (user) {
+          toast({
+            title: "Login Successful",
+            description: "Welcome to the Patient Monitoring System",
+          });
+          
+          // Navigate based on role
+          if (user.role === 'admin') navigate('/admin');
+          else if (user.role === 'doctor') navigate('/doctor');
+          else if (user.role === 'caretaker') navigate('/caretaker');
+        } else {
+          toast({
+            title: "Login Failed",
+            description: "Invalid username or password",
+            variant: "destructive"
+          });
+        }
         
-        // Navigate based on role
-        if (username === 'admin') navigate('/admin');
-        else if (username === 'doctor') navigate('/doctor');
-        else if (username.startsWith('caretaker')) navigate('/caretaker');
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid username or password",
-          variant: "destructive"
-        });
-      }
-      
-      setIsLoading(false);
+        setIsLoading(false);
+      }, 100);
     }, 1000);
   };
 

@@ -1,10 +1,12 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+export type UserRole = 'admin' | 'doctor' | 'caretaker';
+
 interface User {
   id: string;
   name: string;
-  role: 'admin' | 'doctor' | 'caretaker'; // Added role field
+  role: UserRole;
   email: string;
 }
 
