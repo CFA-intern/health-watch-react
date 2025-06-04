@@ -10,7 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,24 +20,26 @@ const Login = () => {
     setTimeout(() => {
       login(username, password);
       
-      // Check if login was successful by checking if user exists after login
+      // Navigate based on email/username used for login
       setTimeout(() => {
-        if (user) {
+        if (username === 'admin@example.com' || username === 'admin') {
           toast({
             title: "Login Successful",
-            description: "Welcome to the Patient Monitoring System",
+            description: "Welcome to the Admin Dashboard",
           });
-          
-          // Navigate based on role
-          if (user.role === 'admin') navigate('/admin');
-          else if (user.role === 'doctor') navigate('/doctor');
-          else if (user.role === 'caretaker') navigate('/caretaker');
+          navigate('/admin');
+        } else if (username === 'doctor@example.com' || username === 'doctor') {
+          toast({
+            title: "Login Successful", 
+            description: "Welcome to the Doctor Dashboard",
+          });
+          navigate('/doctor');
         } else {
           toast({
-            title: "Login Failed",
-            description: "Invalid username or password",
-            variant: "destructive"
+            title: "Login Successful",
+            description: "Welcome to the Caretaker Dashboard",
           });
+          navigate('/caretaker');
         }
         
         setIsLoading(false);
@@ -45,9 +47,9 @@ const Login = () => {
     }, 1000);
   };
 
-  const quickLogin = (user: string) => {
-    setUsername(user);
-    setPassword(user);
+  const quickLogin = (userType: string) => {
+    setUsername(userType);
+    setPassword(userType);
   };
 
   return (

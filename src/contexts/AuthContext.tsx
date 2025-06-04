@@ -20,24 +20,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Mock user for development
-  const [user, setUser] = useState<User | null>({
-    id: '3', // Using caretaker ID as default
-    name: 'Alice Johnson',
-    role: 'caretaker',
-    email: 'alice@example.com'
-  });
+  // Start with no user logged in
+  const [user, setUser] = useState<User | null>(null);
 
   const login = (email: string, password: string) => {
-    // This is just a mock login function
-    if (email === 'admin@example.com') {
+    // Handle different login types
+    if (email === 'admin@example.com' || email === 'admin') {
       setUser({
         id: '1',
         name: 'Admin User',
         role: 'admin',
         email: 'admin@example.com'
       });
-    } else if (email === 'doctor@example.com') {
+    } else if (email === 'doctor@example.com' || email === 'doctor') {
       setUser({
         id: '2',
         name: 'Dr. Sarah Wilson',
