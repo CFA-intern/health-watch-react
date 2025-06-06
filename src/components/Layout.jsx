@@ -8,15 +8,10 @@ import Navigation from './Navigation';
 import AlertHistoryView from './AlertHistoryView';
 import ContactsView from './ContactsView';
 
-interface LayoutProps {
-  children: React.ReactNode;
-  title: string;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children, title }) => {
+const Layout = ({ children, title }) => {
   const { user, logout } = useAuth();
   const { getUnresolvedAlerts } = useData();
-  const [currentView, setCurrentView] = useState<'dashboard' | 'alerts' | 'contacts'>('dashboard');
+  const [currentView, setCurrentView] = useState('dashboard');
 
   const handleLogout = () => {
     logout();

@@ -1,17 +1,7 @@
 
 import { Heart, Activity, Thermometer, Droplets } from 'lucide-react';
 
-interface VitalCardProps {
-  label: string;
-  value: number;
-  unit: string;
-  status: 'normal' | 'warning' | 'critical';
-  icon: 'heart' | 'activity' | 'temperature' | 'droplets';
-  min?: number;
-  max?: number;
-}
-
-const VitalCard: React.FC<VitalCardProps> = ({ 
+const VitalCard = ({ 
   label, 
   value, 
   unit, 

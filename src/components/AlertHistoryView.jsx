@@ -2,11 +2,7 @@
 import { useData } from '../contexts/DataContext';
 import { AlertTriangle, Clock, User, CheckCircle, FileText, XCircle } from 'lucide-react';
 
-interface AlertHistoryViewProps {
-  patientIds?: string[]; // Optional array of patient IDs to filter alerts
-}
-
-const AlertHistoryView: React.FC<AlertHistoryViewProps> = ({ patientIds }) => {
+const AlertHistoryView = ({ patientIds }) => {
   const { alerts, getPatientById } = useData();
   
   // Filter alerts if patientIds are provided, otherwise show all
@@ -32,7 +28,7 @@ const AlertHistoryView: React.FC<AlertHistoryViewProps> = ({ patientIds }) => {
     );
   }
 
-  const renderAlert = (alert: any) => {
+  const renderAlert = (alert) => {
     const patient = getPatientById(alert.patientId);
     const isResolved = alert.resolved;
     

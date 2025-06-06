@@ -1,29 +1,13 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-export type UserRole = 'admin' | 'doctor' | 'caretaker';
+const AuthContext = createContext(undefined);
 
-interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-  email: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }) => {
   // Start with no user logged in
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
 
-  const login = (email: string, password: string) => {
+  const login = (email, password) => {
     // Handle different login types
     if (email === 'admin@example.com' || email === 'admin') {
       setUser({

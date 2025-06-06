@@ -1,13 +1,7 @@
 
 import { AlertTriangle, Phone, Activity } from 'lucide-react';
 
-interface NavigationProps {
-  currentView: 'dashboard' | 'alerts' | 'contacts';
-  onViewChange: (view: 'dashboard' | 'alerts' | 'contacts') => void;
-  alertCount?: number;
-}
-
-const Navigation: React.FC<NavigationProps> = ({ currentView, onViewChange, alertCount = 0 }) => {
+const Navigation = ({ currentView, onViewChange, alertCount = 0 }) => {
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="px-6 py-3">

@@ -1,14 +1,8 @@
 
-import { Alert } from '../contexts/DataContext';
 import { AlertTriangle, Clock, TrendingUp } from 'lucide-react';
 
-interface AlertHistoryProps {
-  alerts: Alert[];
-  patientNames?: { [key: string]: string };
-}
-
-const AlertHistory: React.FC<AlertHistoryProps> = ({ alerts, patientNames = {} }) => {
-  const getAlertIcon = (type: string) => {
+const AlertHistory = ({ alerts, patientNames = {} }) => {
+  const getAlertIcon = (type) => {
     return type === 'critical' ? (
       <AlertTriangle className="h-4 w-4 text-red-500" />
     ) : (
@@ -16,7 +10,7 @@ const AlertHistory: React.FC<AlertHistoryProps> = ({ alerts, patientNames = {} }
     );
   };
 
-  const getAlertColor = (type: string) => {
+  const getAlertColor = (type) => {
     return type === 'critical' 
       ? 'bg-red-50 border-red-200' 
       : 'bg-yellow-50 border-yellow-200';
